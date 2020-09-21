@@ -1,6 +1,9 @@
 package com.example.springredditclone.controller;
 
 import com.example.springredditclone.dto.RegisterRequest;
+import com.example.springredditclone.exception.ConflictException;
+import com.example.springredditclone.exception.EntityNotFoundException;
+import com.example.springredditclone.exception.InvalidRequestException;
 import com.example.springredditclone.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +24,13 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity signup(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity signup(@RequestBody RegisterRequest registerRequest) throws ConflictException, InvalidRequestException {
         authService.signup(registerRequest);
         return new ResponseEntity(OK);
     }
 
     @GetMapping("accountVerification/{token}")
-    public ResponseEntity<String> verifyAccount(@PathVariable String token) {
+    public ResponseEntity<String> verifyAccount(@PathVariable String token) throws EntityNotFoundException {
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account Activated Successully", OK);
     }

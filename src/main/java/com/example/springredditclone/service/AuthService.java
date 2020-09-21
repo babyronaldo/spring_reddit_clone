@@ -1,6 +1,9 @@
 package com.example.springredditclone.service;
 
 import com.example.springredditclone.dto.RegisterRequest;
+import com.example.springredditclone.exception.ConflictException;
+import com.example.springredditclone.exception.EntityNotFoundException;
+import com.example.springredditclone.exception.InvalidRequestException;
 import com.example.springredditclone.exception.SpringRedditException;
 import com.example.springredditclone.model.NotificationEmail;
 import com.example.springredditclone.model.User;
@@ -32,7 +35,12 @@ public class AuthService {
     private MailService mailService;
 
     @Transactional
-    public void signup(RegisterRequest registerRequest) {
+    public void signup(RegisterRequest registerRequest) throws ConflictException, InvalidRequestException {
+        // check for unique username
+        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
+            throw new ConflictException("The username is already exist!");
+        }
+
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
@@ -65,17 +73,17 @@ public class AuthService {
         return passwordEncoder.encode(password);
     }
 
-    public void verifyAccount(String token) {
+    public void verifyAccount(String token) throws EntityNotFoundException {
         Optional<VerificationToken> verificationTokenOptional = verificationTokenRepository.findByToken(token);
 
-        verificationTokenOptional.orElseThrow(() -> new SpringRedditException("Invalid token!"));
+        verificationTokenOptional.orElseThrow(() -> new EntityNotFoundException("Invalid token!"));
         fetchUserAndEnable(verificationTokenOptional.get());
     }
 
     @Transactional
-    private void fetchUserAndEnable(VerificationToken verificationToken) {
+    private void fetchUserAndEnable(VerificationToken verificationToken) throws EntityNotFoundException {
         String userName = verificationToken.getUser().getUsername();
-        User user = userRepository.findByUsername(userName).orElseThrow(() -> new SpringRedditException("User not found with id: " + userName));
+        User user = userRepository.findByUsername(userName). orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userName));
         user.setEnabled(true);
         userRepository.save(user);
     }
