@@ -1,5 +1,7 @@
 package com.example.springredditclone.controller;
 
+import com.example.springredditclone.dto.AuthenticationResponse;
+import com.example.springredditclone.dto.LoginRequest;
 import com.example.springredditclone.dto.RegisterRequest;
 import com.example.springredditclone.exception.ConflictException;
 import com.example.springredditclone.exception.EntityNotFoundException;
@@ -33,5 +35,11 @@ public class AuthController {
     public ResponseEntity<String> verifyAccount(@PathVariable String token) throws EntityNotFoundException {
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account Activated Successully", OK);
+    }
+
+    // login API endpoint
+    @PostMapping("/login")
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 }

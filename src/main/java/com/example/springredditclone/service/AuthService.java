@@ -1,18 +1,26 @@
 package com.example.springredditclone.service;
 
+import com.example.springredditclone.dto.AuthenticationResponse;
+import com.example.springredditclone.dto.LoginRequest;
 import com.example.springredditclone.dto.RegisterRequest;
 import com.example.springredditclone.exception.ConflictException;
 import com.example.springredditclone.exception.EntityNotFoundException;
 import com.example.springredditclone.exception.InvalidRequestException;
 import com.example.springredditclone.exception.SpringRedditException;
+import com.example.springredditclone.exception.UsernameNotFoundException;
 import com.example.springredditclone.model.NotificationEmail;
 import com.example.springredditclone.model.User;
 import com.example.springredditclone.model.VerificationToken;
 import com.example.springredditclone.repository.UserRepository;
 import com.example.springredditclone.repository.VerificationTokenRepository;
+import com.example.springredditclone.security.JWTProvider;
 import com.example.springredditclone.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +33,15 @@ import static java.time.Instant.now;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final VerificationTokenRepository verificationTokenRepository;
-    private MailContentBuilder mail;
-    private MailService mailService;
+    private UserRepository              userRepository;
+    private PasswordEncoder             passwordEncoder;
+    private VerificationTokenRepository verificationTokenRepository;
+    private MailContentBuilder          mail;
+    private MailService                 mailService;
+    private AuthenticationManager       authenticationManager;
+    private JWTProvider                 jwtProvider;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws ConflictException, InvalidRequestException {
@@ -87,4 +96,24 @@ public class AuthService {
         user.setEnabled(true);
         userRepository.save(user);
     }
+
+    public AuthenticationResponse login(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsername(), loginRequest.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String authenticationToken = jwtProvider.generateToken(authenticate);
+
+        return new AuthenticationResponse(authenticationToken, loginRequest.getUsername());
+    }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        org.springframework.security.core.userdetails.User principal =
+                (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return userRepository.findByUsername(principal.getUsername()).orElseThrow(() -> new UsernameNotFoundException(
+                "User name not found - " + principal.getUsername()));
+    }
+
 }
