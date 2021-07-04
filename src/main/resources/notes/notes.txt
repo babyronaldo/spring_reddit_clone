@@ -1,0 +1,2 @@
+https://programmingtechie.com/2019/10/09/build-a-full-stack-reddit-clone-with-spring-boot-and-angular-part-2/
+https://programmingtechie.com/2019/12/14/build-a-full-stack-reddit-clone-with-spring-boot-and-angular-part-5/

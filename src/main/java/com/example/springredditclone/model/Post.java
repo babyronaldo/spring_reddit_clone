@@ -21,19 +21,19 @@ import static javax.persistence.GenerationType.SEQUENCE;
 public class Post {
     @Id
     @GeneratedValue(strategy = SEQUENCE)
-    private Long postId;
+    private Long      postId;
     @NotBlank(message = "Post Name cannot be empty or Null")
-    private String postName;
+    private String    postName;
     @Nullable
-    private String url;
+    private String    url;
     @Nullable
     @Lob
-    private String description;
-    private Integer voteCount;
+    private String    description;
+    private Integer   voteCount;
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
-    private User user;
-    private Instant createdDate;
+    private User      user;
+    private Instant   createdDate;
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Subreddit subreddit;
