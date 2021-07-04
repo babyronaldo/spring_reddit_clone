@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 import static java.time.Instant.now;
@@ -34,6 +35,7 @@ public class SubredditService {
     public SubredditDto save(SubredditDto subredditDto) {
         Subreddit subreddit = subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditDto));
         subredditDto.setId(subreddit.getId());
+        subredditDto.setCreatedDate(subreddit.getCreatedDate());
         return subredditDto;
     }
 

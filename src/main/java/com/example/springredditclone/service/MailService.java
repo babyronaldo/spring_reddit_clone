@@ -27,11 +27,11 @@ public class MailService {
             messageHelper.setTo(notificationEmail.getRecipient());
             messageHelper.setSubject(notificationEmail.getSubject());
 
-            messageHelper.setText(mailContentBuilder.build(notificationEmail.getBody()));
+            messageHelper.setText(notificationEmail.getBody());
         };
         try {
             mailSender.send(messagePreparator);
-            log.info("Activation mail sent!");
+            log.info("An email was sent to " + notificationEmail.getRecipient());
         } catch (Exception e) {
             throw new InvalidRequestException("Exception occurred when sending mail to " + notificationEmail.getRecipient());
         }
