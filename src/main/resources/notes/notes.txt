@@ -1,2 +1,5 @@
 https://programmingtechie.com/2019/10/09/build-a-full-stack-reddit-clone-with-spring-boot-and-angular-part-2/
 https://programmingtechie.com/2019/12/14/build-a-full-stack-reddit-clone-with-spring-boot-and-angular-part-5/
+https://programmingtechie.com/2020/02/24/build-a-full-stack-reddit-clone-with-spring-boot-and-angular-part-7/
+-- JWT and Refresh token - OAuth
+https://programmingtechie.com/2020/03/10/build-a-full-stack-reddit-clone-with-spring-boot-and-angular-part-8/

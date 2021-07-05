@@ -2,6 +2,7 @@ package com.example.springredditclone.service;
 
 import com.example.springredditclone.dto.AuthenticationResponse;
 import com.example.springredditclone.dto.LoginRequest;
+import com.example.springredditclone.dto.RefreshTokenRequest;
 import com.example.springredditclone.dto.RegisterRequest;
 import com.example.springredditclone.exception.ConflictException;
 import com.example.springredditclone.exception.EntityNotFoundException;
@@ -25,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +44,7 @@ public class AuthService {
     private MailService                 mailService;
     private AuthenticationManager       authenticationManager;
     private JWTProvider                 jwtProvider;
+    private RefreshTokenService         refreshTokenService;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) throws ConflictException, InvalidRequestException {
@@ -89,10 +92,9 @@ public class AuthService {
         fetchUserAndEnable(verificationTokenOptional.get());
     }
 
-    @Transactional
     private void fetchUserAndEnable(VerificationToken verificationToken) throws EntityNotFoundException {
         String userName = verificationToken.getUser().getUsername();
-        User user = userRepository.findByUsername(userName). orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userName));
+        User   user     = userRepository.findByUsername(userName).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userName));
         user.setEnabled(true);
         userRepository.save(user);
     }
@@ -104,7 +106,19 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String authenticationToken = jwtProvider.generateToken(authenticate);
 
-        return new AuthenticationResponse(authenticationToken, loginRequest.getUsername());
+        return AuthenticationResponse.builder().authenticationToken(authenticationToken)
+                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+                .expiredAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(loginRequest.getUsername()).build();
+    }
+
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+
+        return AuthenticationResponse.builder().authenticationToken(token).refreshToken(refreshTokenRequest.getRefreshToken())
+                .expiredAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(refreshTokenRequest.getUsername()).build();
     }
 
     @Transactional(readOnly = true)
