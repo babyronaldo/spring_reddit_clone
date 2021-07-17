@@ -7,7 +7,6 @@ import com.example.springredditclone.dto.RegisterRequest;
 import com.example.springredditclone.exception.ConflictException;
 import com.example.springredditclone.exception.EntityNotFoundException;
 import com.example.springredditclone.exception.InvalidRequestException;
-import com.example.springredditclone.exception.SpringRedditException;
 import com.example.springredditclone.exception.UsernameNotFoundException;
 import com.example.springredditclone.model.NotificationEmail;
 import com.example.springredditclone.model.User;
@@ -15,9 +14,7 @@ import com.example.springredditclone.model.VerificationToken;
 import com.example.springredditclone.repository.UserRepository;
 import com.example.springredditclone.repository.VerificationTokenRepository;
 import com.example.springredditclone.security.JWTProvider;
-import com.example.springredditclone.util.Constants;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -108,7 +105,7 @@ public class AuthService {
 
         return AuthenticationResponse.builder().authenticationToken(authenticationToken)
                 .refreshToken(refreshTokenService.generateRefreshToken().getToken())
-                .expiredAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(loginRequest.getUsername()).build();
     }
 
@@ -117,7 +114,7 @@ public class AuthService {
         String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
 
         return AuthenticationResponse.builder().authenticationToken(token).refreshToken(refreshTokenRequest.getRefreshToken())
-                .expiredAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(refreshTokenRequest.getUsername()).build();
     }
 

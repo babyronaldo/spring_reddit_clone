@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**").allowedOrigins("*").allowedMethods("*")
-                .maxAge(360L).allowedHeaders("*").allowCredentials(false);
+                .maxAge(360L).allowedHeaders("*").exposedHeaders("Authorization").allowCredentials(true);
     }
 
     /*we get a 404 Error because we added EnableWebMvc and Spring MVC doesn’t know how to handle the Web Jars which are
